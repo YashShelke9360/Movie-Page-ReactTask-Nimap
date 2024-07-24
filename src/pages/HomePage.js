@@ -1,0 +1,118 @@
+
+
+// import React, { useState, useEffect } from 'react';
+// import { Link } from 'react-router-dom';
+// import { Container, Row, Col, Image, Button } from 'react-bootstrap';
+// import axios from 'axios';
+// import '../App.css';
+
+// const API_URL = 'https://api.themoviedb.org/3/movie/popular';
+// const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
+// const API_KEY = 'c45a857c193f6302f2b5061c3b85e743';
+
+// const HomePage = () => {
+//   const [movies, setMovies] = useState([]);
+//   const [page, setPage] = useState(1);
+//   const [totalPages, setTotalPages] = useState(1);
+
+//   useEffect(() => {
+//     axios.get(`${API_URL}?api_key=${API_KEY}&language=en-US&page=${page}`)
+//       .then(response => {
+//         setMovies(response.data.results);
+//         setTotalPages(response.data.total_pages);
+//       })
+//       .catch(error => console.error('Error fetching the movies:', error));
+//   }, [page]);
+
+//   const handleNextPage = () => {
+//     if (page < totalPages) setPage(page + 1);
+//   };
+
+//   const handlePreviousPage = () => {
+//     if (page > 1) setPage(page - 1);
+//   };
+
+//   return (
+//     <Container>
+//       <Row xs={1} md={2} lg={3} xl={4} className="g-4">
+//         {movies.map(movie => (
+//           <Col key={movie.id} className="d-flex flex-column align-items-center movie-col">
+//             <Image src={`${IMAGE_URL}${movie.poster_path}`} rounded className="mb-2 movie-poster" />
+//             <h3 className="movie-title">{movie.title}</h3>
+//             <p>Rating: {movie.vote_average}</p>
+//             <Link to={`/movie/${movie.id}`}>
+//               <Button variant="dark">View Details</Button>
+//             </Link>
+//           </Col>
+//         ))}
+//       </Row>
+//       <div className="pagination-buttons d-flex justify-content-center mt-4">
+//         <Button onClick={handlePreviousPage} disabled={page === 1} className="mx-2">Previous</Button>
+//         <Button onClick={handleNextPage} disabled={page === totalPages} className="mx-2">Next</Button>
+//       </div>
+//     </Container>
+//   );
+// };
+
+// export default HomePage;
+
+
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Spinner ,Button } from 'react-bootstrap';
+import axios from 'axios';
+import MovieCard from '../components/MovieCard';
+import '../App.css';
+
+const API_URL = 'https://api.themoviedb.org/3/movie/popular';
+const API_KEY = 'c45a857c193f6302f2b5061c3b85e743';
+
+const HomePage = () => {
+  const [movies, setMovies] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    axios.get(`${API_URL}?api_key=${API_KEY}&language=en-US&page=${page}`)
+      .then(response => {
+        setMovies(response.data.results);
+        setTotalPages(response.data.total_pages);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching the movies:', error);
+        setLoading(false);
+      });
+  }, [page]);
+
+  const handleNextPage = () => {
+    if (page < totalPages) setPage(page + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) setPage(page - 1);
+  };
+
+  return (
+    <Container>
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+          <Spinner animation="border" variant="light" />
+        </div>
+      ) : (
+        <>
+          <Row xs={1} md={2} lg={3} xl={4} className="g-4">
+            {movies.map(movie => <MovieCard key={movie.id} movie={movie} />)}
+          </Row>
+          <div className="pagination-buttons d-flex justify-content-center mt-4">
+            <Button onClick={handlePreviousPage} disabled={page === 1} className="mx-2">Previous</Button>
+            <Button onClick={handleNextPage} disabled={page === totalPages} className="mx-2">Next</Button>
+          </div>
+        </>
+      )}
+    </Container>
+  );
+};
+
+export default HomePage;
